@@ -17,7 +17,7 @@
   <body>
     <canvas id="stockChart"></canvas>
     <script>
-      const data = {
+      let data = {
         "2018-06-25": {
           open: "100.0000",
           high: "100.1100",
@@ -67,7 +67,35 @@
           close: "100.1300",
           volume: "65738585",
         },
+        "2018-06-14": {
+          open: "101.5100",
+          high: "107.5300",
+          low: "95.0700",
+          close: "95.1300",
+          volume: "65738585",
+        },
+        "2018-06-13": {
+          open: "101.5100",
+          high: "101.5300",
+          low: "100.0700",
+          close: "100.1300",
+          volume: "65738585",
+        },
       };
+      let i = 0;
+      while (i < 20) {
+        data = {
+          ...data,
+          [`2018-05-${i}`]: {
+            open: "101.5100",
+            high: "101.5300",
+            low: "100.0700",
+            close: "100.1300",
+            volume: "65738585",
+          },
+        };
+        i++;
+      }
     </script>
     <script src="./candlestick.js"></script>
   </body>
