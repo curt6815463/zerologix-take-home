@@ -7,8 +7,6 @@ class Candlesticks {
       delete timeSerie.volume;
       return timeSerie;
     });
-    this.renderedProperties = this.properties;
-
     this.heightPadding = options.heightPadding;
     this.startDrawPosition = this.canvas.width * 0.8;
     this.candleWidth = 16;
@@ -24,6 +22,12 @@ class Candlesticks {
     );
     this.bullColor = "red";
     this.bearColor = "green";
+
+    this.YAxisDrawer = new YAxisDrawer({
+      ctx: this.canvas.getContext("2d"),
+      canvas: this.canvas,
+      heightPadding: options.heightPadding,
+    });
   }
 
   zoom(delta) {
@@ -67,34 +71,10 @@ class Candlesticks {
     this.ctx.restore();
   }
 
-  arrayOfAllPrices(renderedProperties) {
-    return renderedProperties.reduce((result, property) => {
+  arrayOfAllPrices(inChartProperties) {
+    return inChartProperties.reduce((result, property) => {
       return [...result, ...Object.values(property)];
     }, []);
-  }
-
-  drawGrid({ totalAxisInterval, canvasActualHeight, gridMax, scale }) {
-    let currentAxisInterval = 0;
-    while (currentAxisInterval <= totalAxisInterval) {
-      const gridYPosition =
-        canvasActualHeight * (currentAxisInterval / totalAxisInterval) +
-        this.heightPadding;
-      this.drawLine({
-        startX: 0,
-        startY: gridYPosition,
-        endX: this.canvas.width,
-        endY: gridYPosition,
-        color: "#DBDBDB",
-      });
-      const gridValue = gridMax - currentAxisInterval * scale;
-      const text = `${gridValue.toFixed(2)}`;
-      this.drawText({
-        text,
-        x: 0,
-        y: gridYPosition + 2,
-      });
-      currentAxisInterval++;
-    }
   }
 
   drawRect({ leftTopX, leftTopY, width, height, color }) {
@@ -114,9 +94,9 @@ class Candlesticks {
     }
   }
 
-  drawCandle({ renderedProperties, canvasActualHeight, gridMax, gridMin }) {
+  drawCandle({ properties, canvasActualHeight, gridMax, gridMin }) {
     const girdTotalDiff = gridMax - gridMin;
-    renderedProperties.map((property, index) => {
+    properties.map((property, index) => {
       const { open, close, high, low } = property;
       const openPrice = Number.parseFloat(open);
       const closePrice = Number.parseFloat(close);
@@ -161,17 +141,17 @@ class Candlesticks {
       });
     });
   }
-  getRenderedProperties(candleCountsInChart) {
-    return this.renderedProperties.filter((value, index) => {
+  getInChartProperties(candleCountsInChart) {
+    return this.properties.filter((value, index) => {
       return index <= candleCountsInChart;
     });
   }
 
   draw() {
-    const renderedProperties = this.getRenderedProperties(
+    const inChartProperties = this.getInChartProperties(
       this.candleCountsInChart
     );
-    const allPrices = this.arrayOfAllPrices(renderedProperties);
+    const allPrices = this.arrayOfAllPrices(inChartProperties);
 
     const max = Math.max(...allPrices);
     const min = Math.min(...allPrices);
@@ -181,17 +161,19 @@ class Candlesticks {
     const gridMin = gridMax - scale * this.totalAxisInterval;
     const canvasActualHeight = this.canvas.height - this.heightPadding * 2;
 
-    this.drawGrid({
+    const drawInfo = {
+      scale,
+      gridMax,
+      gridMin,
       totalAxisInterval: this.totalAxisInterval,
       canvasActualHeight,
-      gridMax,
-      scale,
-    });
+    };
+    this.YAxisDrawer.draw(drawInfo);
     this.drawCandle({
       canvasActualHeight,
       gridMax,
       gridMin,
-      renderedProperties: this.properties,
+      properties: this.properties,
     });
   }
 }
