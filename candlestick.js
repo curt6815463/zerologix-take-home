@@ -10,16 +10,14 @@ class Candlesticks {
     this.renderedProperties = this.properties;
 
     this.heightPadding = options.heightPadding;
-    this.scale = 5;
-
     this.startDrawPosition = this.canvas.width * 0.8;
     this.candleWidth = 16;
     this.candleXGap = 7;
-
     this.candleMaxWidth = 20;
     this.candleXMaxGap = 8;
     this.candleMinWidth = 2;
     this.candleXMinGap = 0;
+    this.totalAxisInterval = 4;
 
     this.candleCountsInChart = Math.floor(
       this.startDrawPosition / (this.candleWidth + this.candleXGap)
@@ -32,8 +30,11 @@ class Candlesticks {
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
     const isZoomIn = delta > 0;
 
+    const bounceRatio =
+      (this.candleMaxWidth - this.candleMinWidth) /
+      (this.candleXMaxGap - this.candleXMinGap);
     const candleXGapDiff = isZoomIn ? 0.1 : -0.1;
-    const candleWidthDiff = isZoomIn ? 0.25 : -0.25;
+    const candleWidthDiff = isZoomIn ? 0.1 * bounceRatio : -0.1 * bounceRatio;
     this.candleWidth = Math.max(
       Math.min(this.candleMaxWidth, this.candleWidth + candleWidthDiff),
       this.candleMinWidth
@@ -42,7 +43,6 @@ class Candlesticks {
       Math.min(this.candleXMaxGap, this.candleXGap + candleXGapDiff),
       this.candleXMinGap
     );
-    console.log(this.candleWidth, this.candleXGap);
     this.candleCountsInChart = Math.floor(
       this.startDrawPosition / (this.candleWidth + this.candleXGap)
     );
@@ -73,7 +73,7 @@ class Candlesticks {
     }, []);
   }
 
-  drawGrid({ totalAxisInterval, canvasActualHeight, gridMax, gridMin, scale }) {
+  drawGrid({ totalAxisInterval, canvasActualHeight, gridMax, scale }) {
     let currentAxisInterval = 0;
     while (currentAxisInterval <= totalAxisInterval) {
       const gridYPosition =
@@ -176,21 +176,16 @@ class Candlesticks {
     const max = Math.max(...allPrices);
     const min = Math.min(...allPrices);
 
-    this.scale = (max - min) / 3;
-    const gridMax = max + this.scale / 2;
-    const gridMin = gridMax - this.scale * 4;
-    // const gridMax = Math.round(max / this.scale) * this.scale;
-    // const gridMin = Math.round(min / this.scale) * this.scale;
-    const totalAxisInterval = Math.ceil((gridMax - gridMin) / this.scale);
+    const scale = (max - min) / (this.totalAxisInterval - 1);
+    const gridMax = max + scale / 2;
+    const gridMin = gridMax - scale * this.totalAxisInterval;
     const canvasActualHeight = this.canvas.height - this.heightPadding * 2;
-    const canvasActualWidth = this.canvas.width;
 
     this.drawGrid({
-      totalAxisInterval,
+      totalAxisInterval: this.totalAxisInterval,
       canvasActualHeight,
       gridMax,
-      gridMin,
-      scale: this.scale,
+      scale,
     });
     this.drawCandle({
       canvasActualHeight,
