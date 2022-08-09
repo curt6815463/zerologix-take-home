@@ -3,8 +3,9 @@ class CanvasUtilDrawer {
     this.ctx = options.ctx;
   }
 
-  drawText({ text, x, y }) {
+  drawText({ text, x, y, textAlign = "left" }) {
     this.ctx.save();
+    this.ctx.textAlign = textAlign;
     this.ctx.fillStyle = "grey";
     this.ctx.font = "bold 10px Arial";
     this.ctx.fillText(text, x, y);

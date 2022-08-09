@@ -2,7 +2,6 @@ class YAxisDrawer {
   constructor(options) {
     this.canvas = options.canvas;
     this.heightPadding = options.heightPadding;
-
     this.CanvasUtilDrawer = new CanvasUtilDrawer({
       ctx: options.ctx,
     });
@@ -25,8 +24,9 @@ class YAxisDrawer {
       const text = `${gridValue.toFixed(2)}`;
       this.CanvasUtilDrawer.drawText({
         text,
-        x: 0,
-        y: gridYPosition + 2,
+        x: this.canvas.width - 2,
+        y: gridYPosition,
+        textAlign: "right",
       });
       currentAxisInterval++;
     }

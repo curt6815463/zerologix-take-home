@@ -26,12 +26,9 @@ class Candlesticks {
       canvas: this.canvas,
       heightPadding: options.heightPadding,
     });
-
     this.CandleDrawer = new CandleDrawer({
       ctx: this.canvas.getContext("2d"),
       canvas: options.canvas,
-      candleWidth: this.candleWidth,
-      candleXGap: this.candleXGap,
       heightPadding: options.heightPadding,
       bullColor: options.bullColor,
       bearColor: options.bearColor,
@@ -104,13 +101,13 @@ class Candlesticks {
 }
 
 const canvas = document.getElementById("stockChart");
-canvas.width = 700;
-canvas.height = 350;
+canvas.width = 1000;
+canvas.height = 550;
 
 let myCandlesticks = new Candlesticks({
   canvas,
   data,
-  heightPadding: 10,
+  heightPadding: 50,
   totalAxisInterval: 4,
   bullColor: "red",
   bearColor: "green",
