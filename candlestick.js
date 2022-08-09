@@ -8,25 +8,33 @@ class Candlesticks {
       return timeSerie;
     });
     this.heightPadding = options.heightPadding;
-    this.startDrawPosition = this.canvas.width * 0.8;
     this.candleWidth = 16;
     this.candleXGap = 7;
     this.candleMaxWidth = 20;
     this.candleXMaxGap = 8;
     this.candleMinWidth = 2;
     this.candleXMinGap = 0;
-    this.totalAxisInterval = 4;
+    this.totalAxisInterval = options.totalAxisInterval;
 
+    this.startDrawPosition = this.canvas.width * 0.8;
     this.candleCountsInChart = Math.floor(
       this.startDrawPosition / (this.candleWidth + this.candleXGap)
     );
-    this.bullColor = "red";
-    this.bearColor = "green";
 
     this.YAxisDrawer = new YAxisDrawer({
       ctx: this.canvas.getContext("2d"),
       canvas: this.canvas,
       heightPadding: options.heightPadding,
+    });
+
+    this.CandleDrawer = new CandleDrawer({
+      ctx: this.canvas.getContext("2d"),
+      canvas: options.canvas,
+      candleWidth: this.candleWidth,
+      candleXGap: this.candleXGap,
+      heightPadding: options.heightPadding,
+      bullColor: options.bullColor,
+      bearColor: options.bearColor,
     });
   }
 
@@ -84,63 +92,6 @@ class Candlesticks {
     this.ctx.restore();
   }
 
-  getCandleColor({ openPrice, closePrice }) {
-    if (openPrice > closePrice) {
-      return this.bearColor;
-    } else if (openPrice < closePrice) {
-      return this.bullColor;
-    } else {
-      return "#000";
-    }
-  }
-
-  drawCandle({ properties, canvasActualHeight, gridMax, gridMin }) {
-    const girdTotalDiff = gridMax - gridMin;
-    properties.map((property, index) => {
-      const { open, close, high, low } = property;
-      const openPrice = Number.parseFloat(open);
-      const closePrice = Number.parseFloat(close);
-      const highPrice = Number.parseFloat(high);
-      const lowPrice = Number.parseFloat(low);
-
-      const candleColor = this.getCandleColor({ openPrice, closePrice });
-      const rectUpperValue = openPrice > closePrice ? openPrice : closePrice;
-      const rectLeftTopX =
-        this.startDrawPosition -
-        index * this.candleWidth -
-        this.candleXGap * index;
-      const rectLeftTopY =
-        canvasActualHeight * ((gridMax - rectUpperValue) / girdTotalDiff) +
-        this.heightPadding;
-      const isOpenCloseEqual = openPrice === closePrice;
-      const openCloseDiff = Math.abs(openPrice - closePrice);
-      const rectHeight = isOpenCloseEqual
-        ? 1
-        : canvasActualHeight * (openCloseDiff / girdTotalDiff);
-      this.drawRect({
-        leftTopX: rectLeftTopX,
-        leftTopY: rectLeftTopY,
-        width: this.candleWidth,
-        height: rectHeight,
-        color: candleColor,
-      });
-
-      const wickStartY =
-        canvasActualHeight * ((gridMax - highPrice) / girdTotalDiff) +
-        this.heightPadding;
-      const wickEndY =
-        canvasActualHeight * ((gridMax - lowPrice) / girdTotalDiff) +
-        this.heightPadding;
-
-      this.drawLine({
-        startX: rectLeftTopX + this.candleWidth / 2,
-        endX: rectLeftTopX + this.candleWidth / 2,
-        startY: wickStartY,
-        endY: wickEndY,
-        color: candleColor,
-      });
-    });
-  }
   getInChartProperties(candleCountsInChart) {
     return this.properties.filter((value, index) => {
       return index <= candleCountsInChart;
@@ -167,14 +118,12 @@ class Candlesticks {
       gridMin,
       totalAxisInterval: this.totalAxisInterval,
       canvasActualHeight,
+      properties: this.properties,
+      candleWidth: this.candleWidth,
+      candleXGap: this.candleXGap,
     };
     this.YAxisDrawer.draw(drawInfo);
-    this.drawCandle({
-      canvasActualHeight,
-      gridMax,
-      gridMin,
-      properties: this.properties,
-    });
+    this.CandleDrawer.draw(drawInfo);
   }
 }
 
@@ -185,8 +134,10 @@ canvas.height = 350;
 let myCandlesticks = new Candlesticks({
   canvas,
   data,
-  columnCount: 2,
   heightPadding: 10,
+  totalAxisInterval: 4,
+  bullColor: "red",
+  bearColor: "green",
 });
 
 myCandlesticks.draw();
