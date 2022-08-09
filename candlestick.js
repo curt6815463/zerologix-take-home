@@ -3,10 +3,14 @@ class Candlesticks {
     this.canvas = options.canvas;
     this.ctx = this.canvas.getContext("2d");
     this.timeSeries = options.data;
-    this.properties = Object.values(this.timeSeries).map((timeSerie) => {
-      delete timeSerie.volume;
-      return timeSerie;
-    });
+    this.properties = Object.entries(this.timeSeries).map(
+      ([time, property]) => {
+        return {
+          time,
+          ...property,
+        };
+      }
+    );
     this.heightPadding = options.heightPadding;
     this.candleWidth = 16;
     this.candleXGap = 7;
@@ -22,13 +26,13 @@ class Candlesticks {
     );
 
     this.YAxisDrawer = new YAxisDrawer({
-      ctx: this.canvas.getContext("2d"),
       canvas: this.canvas,
+      ctx: this.canvas.getContext("2d"),
       heightPadding: options.heightPadding,
     });
     this.CandleDrawer = new CandleDrawer({
+      canvas: this.canvas,
       ctx: this.canvas.getContext("2d"),
-      canvas: options.canvas,
       heightPadding: options.heightPadding,
       bullColor: options.bullColor,
       bearColor: options.bearColor,
@@ -61,7 +65,8 @@ class Candlesticks {
 
   arrayOfAllPrices(inChartProperties) {
     return inChartProperties.reduce((result, property) => {
-      return [...result, ...Object.values(property)];
+      const { open, high, low, close } = property;
+      return [...result, open, high, low, close];
     }, []);
   }
 
@@ -76,7 +81,6 @@ class Candlesticks {
       this.candleCountsInChart
     );
     const allPrices = this.arrayOfAllPrices(inChartProperties);
-
     const max = Math.max(...allPrices);
     const min = Math.min(...allPrices);
 
@@ -101,8 +105,8 @@ class Candlesticks {
 }
 
 const canvas = document.getElementById("stockChart");
-canvas.width = 1000;
-canvas.height = 550;
+canvas.width = 700;
+canvas.height = 350;
 
 let myCandlesticks = new Candlesticks({
   canvas,

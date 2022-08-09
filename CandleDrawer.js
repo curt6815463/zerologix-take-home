@@ -2,12 +2,16 @@ class CandleDrawer {
   constructor(options) {
     this.bullColor = options.bullColor;
     this.bearColor = options.bearColor;
-    this.canvas = options.canvas;
     this.startDrawPosition = options.startDrawPosition;
     this.heightPadding = options.heightPadding;
 
     this.CanvasUtilDrawer = new CanvasUtilDrawer({
       ctx: options.ctx,
+    });
+    this.CandleTimeDrawer = new CandleTimeDrawer({
+      ctx: options.ctx,
+      canvas: options.canvas,
+      CanvasUtilDrawer: this.CanvasUtilDrawer,
     });
   }
 
@@ -29,6 +33,11 @@ class CandleDrawer {
     candleWidth,
     candleXGap,
   }) {
+    this.CandleTimeDrawer.setDrawInterval({
+      text: properties[0].time,
+      candleWidth,
+      candleXGap,
+    });
     const girdTotalDiff = gridMax - gridMin;
     properties.map((property, index) => {
       const { open, close, high, low } = property;
@@ -58,6 +67,9 @@ class CandleDrawer {
         color: candleColor,
       });
 
+      const wickStartX = rectLeftTopX + candleWidth / 2;
+      const wickEndX = rectLeftTopX + candleWidth / 2;
+
       const wickStartY =
         canvasActualHeight * ((gridMax - highPrice) / girdTotalDiff) +
         this.heightPadding;
@@ -66,11 +78,17 @@ class CandleDrawer {
         this.heightPadding;
 
       this.CanvasUtilDrawer.drawLine({
-        startX: rectLeftTopX + candleWidth / 2,
-        endX: rectLeftTopX + candleWidth / 2,
+        startX: wickStartX,
+        endX: wickEndX,
         startY: wickStartY,
         endY: wickEndY,
         color: candleColor,
+      });
+
+      this.CandleTimeDrawer.draw({
+        startX: wickStartX,
+        time: property.time,
+        index,
       });
     });
   }
