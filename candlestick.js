@@ -35,6 +35,7 @@ class Candlesticks {
       heightPadding: options.heightPadding,
       bullColor: options.bullColor,
       bearColor: options.bearColor,
+      startDrawPosition: this.startDrawPosition,
     });
   }
 
@@ -61,35 +62,10 @@ class Candlesticks {
     this.draw();
   }
 
-  drawLine({ startX, startY, endX, endY, color }) {
-    this.ctx.save();
-    this.ctx.strokeStyle = color;
-    this.ctx.beginPath();
-    this.ctx.moveTo(startX, startY);
-    this.ctx.lineTo(endX, endY);
-    this.ctx.stroke();
-    this.ctx.restore();
-  }
-
-  drawText({ text, x, y }) {
-    this.ctx.save();
-    this.ctx.fillStyle = "grey";
-    this.ctx.font = "bold 10px Arial";
-    this.ctx.fillText(text, x, y);
-    this.ctx.restore();
-  }
-
   arrayOfAllPrices(inChartProperties) {
     return inChartProperties.reduce((result, property) => {
       return [...result, ...Object.values(property)];
     }, []);
-  }
-
-  drawRect({ leftTopX, leftTopY, width, height, color }) {
-    this.ctx.save();
-    this.ctx.fillStyle = color;
-    this.ctx.fillRect(leftTopX, leftTopY, width, height);
-    this.ctx.restore();
   }
 
   getInChartProperties(candleCountsInChart) {

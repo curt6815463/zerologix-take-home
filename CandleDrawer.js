@@ -3,9 +3,12 @@ class CandleDrawer {
     this.bullColor = options.bullColor;
     this.bearColor = options.bearColor;
     this.canvas = options.canvas;
-    this.ctx = options.ctx;
-    this.startDrawPosition = this.canvas.width * 0.8;
+    this.startDrawPosition = options.startDrawPosition;
     this.heightPadding = options.heightPadding;
+
+    this.CanvasUtilDrawer = new CanvasUtilDrawer({
+      ctx: options.ctx,
+    });
   }
 
   getCandleColor({ openPrice, closePrice }) {
@@ -16,23 +19,6 @@ class CandleDrawer {
     } else {
       return "#000";
     }
-  }
-
-  drawLine({ startX, startY, endX, endY, color }) {
-    this.ctx.save();
-    this.ctx.strokeStyle = color;
-    this.ctx.beginPath();
-    this.ctx.moveTo(startX, startY);
-    this.ctx.lineTo(endX, endY);
-    this.ctx.stroke();
-    this.ctx.restore();
-  }
-
-  drawRect({ leftTopX, leftTopY, width, height, color }) {
-    this.ctx.save();
-    this.ctx.fillStyle = color;
-    this.ctx.fillRect(leftTopX, leftTopY, width, height);
-    this.ctx.restore();
   }
 
   drawCandle({
@@ -63,7 +49,8 @@ class CandleDrawer {
       const rectHeight = isOpenCloseEqual
         ? 1
         : canvasActualHeight * (openCloseDiff / girdTotalDiff);
-      this.drawRect({
+
+      this.CanvasUtilDrawer.drawRect({
         leftTopX: rectLeftTopX,
         leftTopY: rectLeftTopY,
         width: candleWidth,
@@ -78,7 +65,7 @@ class CandleDrawer {
         canvasActualHeight * ((gridMax - lowPrice) / girdTotalDiff) +
         this.heightPadding;
 
-      this.drawLine({
+      this.CanvasUtilDrawer.drawLine({
         startX: rectLeftTopX + candleWidth / 2,
         endX: rectLeftTopX + candleWidth / 2,
         startY: wickStartY,
